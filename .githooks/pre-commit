@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Managed by pre-commit framework via core.hooksPath.
+# Run `git config core.hooksPath .githooks` after cloning.
+set -e
+exec pre-commit hook-impl \
+    --config=.pre-commit-config.yaml \
+    --hook-type=pre-commit \
+    --hook-dir="$(dirname "$0")" \
+    -- "$@"
