@@ -1,6 +1,6 @@
 # AI Master Instructions
 
-作業開始時に `CLAUDE.md` → `rules.md` → `LEARNINGS.md` の順で読み込むこと。
+作業開始時に `master.md` → `rules.md` → `LEARNINGS.md` の順で読み込むこと。
 `HANDOFF.md` が存在する場合は最優先で読むこと。
 
 ---
@@ -56,8 +56,8 @@ uv run ruff format .        # フォーマット
 
 | トリガー | 更新対象 | 更新内容 |
 |---|---|---|
-| `pyproject.toml` に依存を追加/削除した | `CLAUDE.md` 技術スタック | ライブラリ一覧の同期 |
-| コマンドが失敗した・変わった | `CLAUDE.md` コマンド | 正しいコマンドに修正 |
+| `pyproject.toml` に依存を追加/削除した | `master.md` 技術スタック | ライブラリ一覧の同期 |
+| コマンドが失敗した・変わった | `master.md` コマンド | 正しいコマンドに修正 |
 | 新しいディレクトリを作成した | `rules.md` ディレクトリ構成 | 実構成に同期 |
 | プロジェクト固有の技術選択をした | `rules.md` | 選択内容と理由を追記 |
 | ハマった・想定外の挙動に遭遇した | `LEARNINGS.md` | 教訓を追記 |
