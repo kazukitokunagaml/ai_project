@@ -7,86 +7,61 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 jobs:
-  lint-and-sync:
+  sync-instructions:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed for git commit and push
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Get all history to allow git add/commit
+          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install pre-commit
-        run: pip install pre-commit
-
-      - name: Run pre-commit hooks (excluding sync)
-        run: pre-commit run --all-files --hook-stage manual
-        continue-on-error: true
-
-      - name: Sync AI Documentation Files
+      - name: Sync AI Pointer Files
         id: sync_docs
         run: |
-          MASTER=".settings/master.md"
-          RULES=".settings/rules.md"
+          # 1. 全ツール共通の指示テキスト
+          POINTER=$(cat << 'EOF'
+          # AI Master Instructions
 
-          MASTER_TARGETS=(
+          作業開始時に `.instructions` にある、`master.md` → `rules.md` → `LEARNINGS.md` の順で読み込むこと。
+          `HANDOFF.md` が存在する場合は最優先で読むこと。
+          EOF
+          )
+
+          # 2. 配信先のリスト
+          TARGETS=(
               ".claude/claude.md"
               ".codex/agents.md"
               ".gemini/gemini.md"
               ".github/copilot-instructions.md"
           )
 
-          RULES_TARGETS=(
-              ".claude/rules/rules.md"
-              ".codex/rules/rules.md"
-              ".gemini/rules/rules.md"
-          )
-
-          changed=0
-
-          sync_file() {
-              local src="$1"
-              local dst="$2"
-              if ! cmp -s "$src" "$dst" 2>/dev/null; then
-                  mkdir -p "$(dirname "$dst")" # Ensure directory exists
-                  cp "$src" "$dst"
-                  git add "$dst"
-                  echo "synced: $src -> $dst"
-                  changed=1
-              fi
-          }
-
-          for dst in "${MASTER_TARGETS[@]}"; do
-              sync_file "$MASTER" "$dst"
+          # 3. ファイルの書き込み
+          for dst in "${TARGETS[@]}"; do
+              mkdir -p "$(dirname "$dst")"
+              echo "$POINTER" > "$dst"
+              git add "$dst"
           done
 
-          for dst in "${RULES_TARGETS[@]}"; do
-              sync_file "$RULES" "$dst"
-          done
-
-          if [ "$changed" -eq 1 ]; then
-              echo "Documentation files were synced. Creating a commit."
+          # 4. 変更があればコミット
+          if [ -n "$(git status --porcelain)" ]; then
+              echo "Changes detected. Committing..."
               git config user.name "github-actions[bot]"
               git config user.email "github-actions[bot]@users.noreply.github.com"
-              git commit -m "docs: Sync AI documentation files"
+              git commit -m "docs: Sync AI instruction pointers"
               git push
-              echo "::set-output name=docs_synced::true"
+              echo "docs_synced=true" >> $GITHUB_OUTPUT
           else
-              echo "Documentation files are already up to date."
-              echo "::set-output name=docs_synced::false"
+              echo "No changes to sync."
+              echo "docs_synced=false" >> $GITHUB_OUTPUT
           fi
         shell: bash
 
-      - name: Notify on documentation sync
+      - name: Notify on sync
         if: steps.sync_docs.outputs.docs_synced == 'true'
-        run: echo "Documentation files were synced and committed to the repository."
+        run: echo "AI pointer files have been updated."
