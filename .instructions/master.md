@@ -1,10 +1,5 @@
 # AI Master Instructions
 
-作業開始時に `.instructions`にある、`master.md` → `rules.md` → `LEARNINGS.md` の順で読み込むこと。
-`HANDOFF.md` が存在する場合は最優先で読むこと。
-
----
-
 ## 行動原則
 
 - **外科的変更**: 依頼された箇所だけを直せ。周辺コードの改善・リファクタリング・フォーマット修正はするな
